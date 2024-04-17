@@ -15,7 +15,7 @@ public class User {
     private String login;
     
     @Column(name = "name")
-    private Long name;
+    private String name;
     
     @ManyToOne
     @JoinColumn(name = "city_id")
@@ -37,11 +37,11 @@ public class User {
         this.login = login;
     }
     
-    public Long getName() {
+    public String getName() {
         return name;
     }
     
-    public void setName(Long name) {
+    public void setName(String name) {
         this.name = name;
     }
     

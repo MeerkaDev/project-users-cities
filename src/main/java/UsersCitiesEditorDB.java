@@ -2,8 +2,7 @@ import entities.City;
 import entities.User;
 import jakarta.persistence.*;
 
-import java.util.List;
-import java.util.Scanner;
+import java.util.*;
 
 public class UsersCitiesEditorDB {
     public static void createUser(Scanner scanner, EntityManagerFactory factory) {
@@ -20,9 +19,8 @@ public class UsersCitiesEditorDB {
         StringBuilder chosenCityId = null;
         while (true) {
             System.out.println("Выберите город (введите id города из списка ниже):");
-            
-            for (City city : cities) {
-                System.out.println(city.getName() + " - " + city.getId());
+            for (int i = 0; i < cities.size(); i++) {
+                System.out.println(cities.get(i).getName() + " - " + (i + 1));
             }
             
             chosenCityId = new StringBuilder(scanner.nextLine());
@@ -31,7 +29,7 @@ public class UsersCitiesEditorDB {
                 "select c from City c where c.id = ?1", City.class
             ); // Переделать через параметры
             
-            chosenCityQuery.setParameter(1, Integer.parseInt(chosenCityId.toString()));
+            chosenCityQuery.setParameter(1, cities.get(Integer.parseInt(chosenCityId.toString()) - 1).getId());
             
             try {
                 chosenCity = chosenCityQuery.getSingleResult();
@@ -88,7 +86,7 @@ public class UsersCitiesEditorDB {
         TypedQuery<User> checkCreatedUser = manager.createQuery(
             "select u from User u where u.login = ?1", User.class
         );
-        checkCreatedUser.setParameter(1,chosenLogin.toString());
+        checkCreatedUser.setParameter(1, chosenLogin.toString());
         User userForCheck = checkCreatedUser.getSingleResult();
         
         System.out.println("Пользователь с логином " + userForCheck.getLogin() +
@@ -135,9 +133,8 @@ public class UsersCitiesEditorDB {
             System.out.println("Измените город с " + userToEdit.getCity().getName() +
                 " на любой из списка ниже (для выбора впишите id города," +
                 " для отказа от изменения ничего не вписывайте и нажмите Enter):");
-            
-            for (City city : cities) {
-                System.out.println(city.getName() + " - " + city.getId());
+            for (int i = 0; i < cities.size(); i++) {
+                System.out.println(cities.get(i).getName() + " - " + (i + 1));
             }
             
             chosenCityId = new StringBuilder(scanner.nextLine());
@@ -149,7 +146,7 @@ public class UsersCitiesEditorDB {
                     "select c from City c where c.id = ?1", City.class
                 ); // Переделать через параметры
                 
-                chosenCityQuery.setParameter(1, Integer.parseInt(chosenCityId.toString()));
+                chosenCityQuery.setParameter(1, cities.get(Integer.parseInt(chosenCityId.toString()) - 1).getId());
                 
                 try {
                     chosenCity = chosenCityQuery.getSingleResult();
@@ -170,7 +167,7 @@ public class UsersCitiesEditorDB {
         if (!chosenName.isEmpty()) {
             userToEdit.setName(chosenName);
         }
-    
+        
         try {
             manager.getTransaction().begin();
             

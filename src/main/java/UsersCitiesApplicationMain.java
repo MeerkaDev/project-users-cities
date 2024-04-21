@@ -40,4 +40,4 @@ public class UsersCitiesApplicationMain {
             }
         }
     }
-} // All the checks if result from DB is null replace with try catch of NoResultException
+}

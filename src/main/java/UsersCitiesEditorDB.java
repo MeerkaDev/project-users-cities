@@ -32,11 +32,11 @@ public class UsersCitiesEditorDB {
             ); // Переделать через параметры
             
             chosenCityQuery.setParameter(1, Integer.parseInt(chosenCityId.toString()));
-            chosenCity = chosenCityQuery.getSingleResult();
             
-            if (chosenCity != null) {
+            try {
+                chosenCity = chosenCityQuery.getSingleResult();
                 break;
-            } else {
+            } catch (RuntimeException e) {
                 System.out.println("Некорректно введен id города, либо город с таким id не найден!");
                 chosenCityId = null;
             }
@@ -54,13 +54,14 @@ public class UsersCitiesEditorDB {
             );
             
             chosenLoginQuery.setParameter(1, chosenLogin.toString());
-            User existingUserWithLogin = chosenLoginQuery.getSingleResult();
+            User existingUserWithLogin = null;
             
-            if (existingUserWithLogin == null) {
-                break;
-            } else {
+            try {
+                existingUserWithLogin = chosenLoginQuery.getSingleResult();
                 System.out.println("Пользователь с таким логином уже существует, выберите другой!");
                 chosenLogin = null;
+            } catch (RuntimeException e) {
+                break;
             }
         }
         
@@ -87,7 +88,7 @@ public class UsersCitiesEditorDB {
         TypedQuery<User> checkCreatedUser = manager.createQuery(
             "select u from User u where u.login = ?1", User.class
         );
-        
+        checkCreatedUser.setParameter(1,chosenLogin.toString());
         User userForCheck = checkCreatedUser.getSingleResult();
         
         System.out.println("Пользователь с логином " + userForCheck.getLogin() +
@@ -115,7 +116,7 @@ public class UsersCitiesEditorDB {
                 User foundUser = findByLoginQuery.getSingleResult();
                 userToEdit = foundUser;
                 break;
-            } catch (NoResultException e) {
+            } catch (RuntimeException e) {
                 System.out.println("Пользователь с таким логином не найден, впишите другой!");
                 loginToFind = null;
             }
@@ -131,7 +132,7 @@ public class UsersCitiesEditorDB {
         City chosenCity = null;
         
         while (true) {
-            System.out.println("Измените город с" + userToEdit.getCity().getName() +
+            System.out.println("Измените город с " + userToEdit.getCity().getName() +
                 " на любой из списка ниже (для выбора впишите id города," +
                 " для отказа от изменения ничего не вписывайте и нажмите Enter):");
             
@@ -141,7 +142,7 @@ public class UsersCitiesEditorDB {
             
             chosenCityId = new StringBuilder(scanner.nextLine());
             
-            if (chosenCityId.equals("")) {
+            if (chosenCityId.isEmpty()) {
                 break;
             } else {
                 TypedQuery<City> chosenCityQuery = manager.createQuery(
@@ -149,12 +150,12 @@ public class UsersCitiesEditorDB {
                 ); // Переделать через параметры
                 
                 chosenCityQuery.setParameter(1, Integer.parseInt(chosenCityId.toString()));
-                chosenCity = chosenCityQuery.getSingleResult();
                 
-                if (chosenCity != null) {
+                try {
+                    chosenCity = chosenCityQuery.getSingleResult();
                     userToEdit.setCity(chosenCity);
                     break;
-                } else {
+                } catch (RuntimeException e) {
                     System.out.println("Некорректно введен id города, либо город с таким id не найден!");
                     chosenCityId = null;
                 }
@@ -166,7 +167,7 @@ public class UsersCitiesEditorDB {
         
         String chosenName = scanner.nextLine();
         
-        if (!chosenName.equals("")) {
+        if (!chosenName.isEmpty()) {
             userToEdit.setName(chosenName);
         }
     

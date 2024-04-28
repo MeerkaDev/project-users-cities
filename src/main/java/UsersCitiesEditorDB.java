@@ -15,44 +15,45 @@ public class UsersCitiesEditorDB {
         
         List<City> cities = cityTypedQuery.getResultList();
         
-        City chosenCity = null;
-        StringBuilder chosenCityId = null;
+        City chosenCity;
         while (true) {
             System.out.println("Выберите город (введите id города из списка ниже):");
             for (int i = 1; i <= cities.size(); i++) {
                 System.out.println(cities.get(i).getName() + " - " + i);
             }
-            
-            chosenCityId = new StringBuilder(scanner.nextLine());
+    
+            String chosenCityId = scanner.nextLine();
             
             try {
-                chosenCity = cities.get(Integer.parseInt(chosenCityId.toString()) - 1);
-                break;
-            } catch (RuntimeException e) {
-                System.out.println("Некорректно введен id города, либо город с таким id не найден!");
-                chosenCityId = null;
+                int numberInList = Integer.parseInt(chosenCityId) - 1;
+                if (numberInList < cities.size() && numberInList > 0) {
+                    chosenCity = cities.get(numberInList);
+                    break;
+                } else {
+                    System.out.println("Город с таким id не найден");
+                }
+            } catch (NumberFormatException e) {
+                System.out.println("Некорректно введен id города!");
             }
         }
         
-        StringBuilder chosenLogin = null;
+        String chosenLogin;
         
         while (true) {
             System.out.println("Впишите уникальный логин пользователя:");
             
-            chosenLogin = new StringBuilder(scanner.nextLine());
+            chosenLogin = scanner.nextLine();
             
-            TypedQuery<User> chosenLoginQuery = manager.createQuery(
-                "select u from User u where u.login = ?1", User.class
+            TypedQuery<Long> userCountQuery = manager.createQuery(
+                "select count(u.id) from User u where u.login = ?1", Long.class
             );
+    
+            userCountQuery.setParameter(1, chosenLogin);
+            long userWithLoginCount = userCountQuery.getSingleResult();
             
-            chosenLoginQuery.setParameter(1, chosenLogin.toString());
-            User existingUserWithLogin = null;
-            
-            try {
-                existingUserWithLogin = chosenLoginQuery.getSingleResult();
+            if (userWithLoginCount != 0) {
                 System.out.println("Пользователь с таким логином уже существует, выберите другой!");
-                chosenLogin = null;
-            } catch (RuntimeException e) {
+            } else {
                 break;
             }
         }
@@ -63,7 +64,7 @@ public class UsersCitiesEditorDB {
         
         User userToAdd = new User();
         userToAdd.setCity(chosenCity);
-        userToAdd.setLogin(chosenLogin.toString());
+        userToAdd.setLogin(chosenLogin);
         userToAdd.setName(chosenName);
         
         try {
@@ -80,7 +81,7 @@ public class UsersCitiesEditorDB {
         TypedQuery<User> checkCreatedUser = manager.createQuery(
             "select u from User u where u.login = ?1", User.class
         );
-        checkCreatedUser.setParameter(1, chosenLogin.toString());
+        checkCreatedUser.setParameter(1, chosenLogin);
         User userForCheck = checkCreatedUser.getSingleResult();
         
         System.out.println("Пользователь с логином " + userForCheck.getLogin() +
@@ -91,26 +92,23 @@ public class UsersCitiesEditorDB {
     public static void findAndEditUser(Scanner scanner, EntityManagerFactory factory) {
         EntityManager manager = factory.createEntityManager();
         
-        User userToEdit = null;
-        StringBuilder loginToFind = null;
+        User userToEdit;
         
         while (true) {
             System.out.println("Впишите уникальный логин пользователя для поиска в БД:");
-            
-            loginToFind = new StringBuilder(scanner.nextLine());
+    
+            String loginToFind = scanner.nextLine();
             
             TypedQuery<User> findByLoginQuery = manager.createQuery(
                 "select u from User u where u.login = ?1", User.class
             );
             
-            findByLoginQuery.setParameter(1, loginToFind.toString());
+            findByLoginQuery.setParameter(1, loginToFind);
             try {
-                User foundUser = findByLoginQuery.getSingleResult();
-                userToEdit = foundUser;
+                userToEdit = findByLoginQuery.getSingleResult();
                 break;
-            } catch (RuntimeException e) {
+            } catch (NoResultException e) {
                 System.out.println("Пользователь с таким логином не найден, впишите другой!");
-                loginToFind = null;
             }
         }
         
@@ -120,9 +118,6 @@ public class UsersCitiesEditorDB {
         
         List<City> cities = cityTypedQuery.getResultList();
         
-        StringBuilder chosenCityId = null;
-        City chosenCity = null;
-        
         while (true) {
             System.out.println("Измените город с " + userToEdit.getCity().getName() +
                 " на любой из списка ниже (для выбора впишите id города," +
@@ -130,19 +125,23 @@ public class UsersCitiesEditorDB {
             for (int i = 1; i <= cities.size(); i++) {
                 System.out.println(cities.get(i).getName() + " - " + i);
             }
-            
-            chosenCityId = new StringBuilder(scanner.nextLine());
+    
+            String chosenCityId = scanner.nextLine();
             
             if (chosenCityId.isEmpty()) {
                 break;
             } else {
                 try {
-                    chosenCity = cities.get(Integer.parseInt(chosenCityId.toString()) - 1);
-                    userToEdit.setCity(chosenCity);
-                    break;
-                } catch (RuntimeException e) {
-                    System.out.println("Некорректно введен id города, либо город с таким id не найден!");
-                    chosenCityId = null;
+                    int numberInList = Integer.parseInt(chosenCityId) - 1;
+                    if (numberInList < cities.size() && numberInList > 0) {
+                        City chosenCity = cities.get(Integer.parseInt(chosenCityId) - 1);
+                        userToEdit.setCity(chosenCity);
+                        break;
+                    } else {
+                        System.out.println("Город с таким id не найден!");
+                    }
+                } catch (NumberFormatException e) {
+                    System.out.println("Некорректно введен id города!");
                 }
             }
         }

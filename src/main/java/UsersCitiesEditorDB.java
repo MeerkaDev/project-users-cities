@@ -19,20 +19,14 @@ public class UsersCitiesEditorDB {
         StringBuilder chosenCityId = null;
         while (true) {
             System.out.println("Выберите город (введите id города из списка ниже):");
-            for (int i = 0; i < cities.size(); i++) {
-                System.out.println(cities.get(i).getName() + " - " + (i + 1));
+            for (int i = 1; i <= cities.size(); i++) {
+                System.out.println(cities.get(i).getName() + " - " + i);
             }
             
             chosenCityId = new StringBuilder(scanner.nextLine());
             
-            TypedQuery<City> chosenCityQuery = manager.createQuery(
-                "select c from City c where c.id = ?1", City.class
-            ); // Переделать через параметры
-            
-            chosenCityQuery.setParameter(1, cities.get(Integer.parseInt(chosenCityId.toString()) - 1).getId());
-            
             try {
-                chosenCity = chosenCityQuery.getSingleResult();
+                chosenCity = cities.get(Integer.parseInt(chosenCityId.toString()) - 1);
                 break;
             } catch (RuntimeException e) {
                 System.out.println("Некорректно введен id города, либо город с таким id не найден!");
@@ -133,8 +127,8 @@ public class UsersCitiesEditorDB {
             System.out.println("Измените город с " + userToEdit.getCity().getName() +
                 " на любой из списка ниже (для выбора впишите id города," +
                 " для отказа от изменения ничего не вписывайте и нажмите Enter):");
-            for (int i = 0; i < cities.size(); i++) {
-                System.out.println(cities.get(i).getName() + " - " + (i + 1));
+            for (int i = 1; i <= cities.size(); i++) {
+                System.out.println(cities.get(i).getName() + " - " + i);
             }
             
             chosenCityId = new StringBuilder(scanner.nextLine());
@@ -142,14 +136,8 @@ public class UsersCitiesEditorDB {
             if (chosenCityId.isEmpty()) {
                 break;
             } else {
-                TypedQuery<City> chosenCityQuery = manager.createQuery(
-                    "select c from City c where c.id = ?1", City.class
-                ); // Переделать через параметры
-                
-                chosenCityQuery.setParameter(1, cities.get(Integer.parseInt(chosenCityId.toString()) - 1).getId());
-                
                 try {
-                    chosenCity = chosenCityQuery.getSingleResult();
+                    chosenCity = cities.get(Integer.parseInt(chosenCityId.toString()) - 1);
                     userToEdit.setCity(chosenCity);
                     break;
                 } catch (RuntimeException e) {
